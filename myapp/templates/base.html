@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Moje Django Stránka{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>{% block header %}Vítej na mé stránce{% endblock %}</h1>
+    </header>
+
+    <main>
+        {% block content %}
+        <p>Toto je výchozí obsah.</p>
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Moje Webová Aplikace</p>
+    </footer>
+</body>
+</html>

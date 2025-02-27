@@ -1,0 +1,21 @@
+# Virtuální prostředí
+venv/
+env/
+
+# Python cache & migrace
+__pycache__/
+*.pyc
+*.pyo
+migrations/
+
+# Databázové soubory (NECHCEŠ NA GITHUBU)
+db.sqlite3
+
+# Statické a mediální soubory
+staticfiles/
+media/
+
+# IDE a systémové soubory
+.vscode/
+.idea/
+.DS_Store
