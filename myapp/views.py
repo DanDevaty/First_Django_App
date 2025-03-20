@@ -2,6 +2,11 @@ from django.shortcuts import render, HttpResponse, redirect
 from .models import ToDoItem
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, logout
+from django.contrib import messages
+
+
 
 # Create your views here.
 def home(request):
@@ -18,13 +23,18 @@ def add_todo(request):
 def add_todo_ajax(request):
     if request.method == "POST":
         title = request.POST.get('title')  # Získání názvu úkolu
+        man = request.POST.get('man')  # Získání jména, pokud není, nastaví se na 'Neznámý'
         deadline = request.POST.get('deadline')  # Získání datumu splnění
-        if title or deadline:  # Pokud název není prázdný
-            task = ToDoItem.objects.create(title=title, deadline=deadline, completed=False)  # Vytvoření nového úkolu
+        
+        if title:  # Pokud název není prázdný
+            task = ToDoItem.objects.create(title=title, man=man, deadline=deadline, completed=False)  # Vytvoření nového úkolu
             task.save()
             return JsonResponse({"status": "success", "task_id": task.id, "title": task.title})
+        
         return JsonResponse({"status": "error", "message": "Title is required"})
+    
     return JsonResponse({"status": "error", "message": "Invalid request"})
+
 
 def mark_completed(request):
     if request.method == "POST":
@@ -48,4 +58,3 @@ def delete_todo(request):
         except ObjectDoesNotExist:
             return JsonResponse({"status": "error", "message": "Task not found"})
     return JsonResponse({"status": "error", "message": "Invalid request method"})      
-        

@@ -1,20 +1,32 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en" data-bs-theme="light">
 <head>
+    {% load static %}
     {% csrf_token %}
     <meta charset="UTF-8">
     <title>Přidat nový úkol</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Přidání jQuery -->
 </head>
 <body class="container mt-4">
-    <h1 class="mb-4">Přidat nový úkol</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Přidat nový úkol</h1>
+
+        <!-- Dark Mode přepínač -->
+        <button id="toggleTheme" class="btn btn-secondary mb-4">
+            <i id="themeIcon" class="bi bi-moon-fill"></i>
+        </button>
+    </div>
 
     <form id="add-todo-form">
         {% csrf_token %}
         
         <input type="text" name="title" class="form-control" id="title" placeholder="Zadej nový úkol" required>
-    
+
+        <label for="man" class="mt-2">Jméno:</label>
+        <input type="text" name="man" class="form-control" id="man" placeholder="Zadejte jméno" /> 
+        
         <label for="deadline" class="mt-2">Datum splnění:</label>
         <input type="date" name="deadline" class="form-control" id="deadline">
     
@@ -25,12 +37,14 @@
 
     <a href="{% url 'Todos' %}" class="btn btn-link mt-3">Zpět na seznam úkolů</a>
 
+    <script src="{% static 'js/darkmode.js' %}"></script> <!-- Odkaz na externí JavaScript soubor -->    
     <script>
         $(document).ready(function() {
             // Odeslání formuláře pomocí AJAXu
             $("#add-todo-form").submit(function(event) {
                 event.preventDefault();  // Zamezení odeslání formuláře standardním způsobem
                 var title = $("#title").val();  // Získání hodnoty z inputu
+                var man = $("#man").val();
                 var deadline = $("#deadline").val();  // 🛠️ Získání hodnoty deadline
 
                 // Odeslání AJAX požadavku na server
@@ -39,6 +53,7 @@
                     type: "POST",
                     data: {
                         title: title,
+                        man: man,
                         deadline: deadline,
                         csrfmiddlewaretoken: '{{ csrf_token }}'  // Odeslání CSRF tokenu
                     },

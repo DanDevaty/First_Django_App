@@ -1,14 +1,24 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en" data-bs-theme="light">
 <head>
     {% csrf_token %}
     <meta charset="UTF-8">
     <title>Seznam úkolů</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Přidání jQuery -->
 </head>
-<body class="container mt-4">
-    <h1 class="mb-4">Moje To-Do List ✅</h1>
+<body class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Můj To-Do List ✅</h1>
+
+        <!-- Dark Mode přepínač -->
+        <button id="toggleTheme" class="btn btn-secondary mb-4">
+            <i id="themeIcon" class="bi bi-moon-fill"></i>
+        </button>
+    </div>
+
     <ul class="list-group" id="todos-list">
         {% for todo in todos %}
             <li class="list-group-item d-flex justify-content-between align-items-center" id="todo-{{ todo.id }}">
@@ -16,9 +26,14 @@
                     <strong>{{ todo.title }}</strong>
                     <small class="text-muted">
                         {% if todo.deadline %}
-                            (🗓 Deadline: {{ todo.deadline|date:"d.m.Y" }})
+                            (Deadline: {{ todo.deadline|date:"d.m.Y" }})
                         {% else %}
                             (Žádný deadline)
+                        {% endif %}
+                        {% if todo.man %}
+                            (Pověřený: {{ todo.man }})
+                        {% else %}
+                            (Pověřený: Všichni)
                         {% endif %}
                     </small>
                 </div>
@@ -32,55 +47,51 @@
             <li class="list-group-item">Žádné úkoly k zobrazení.</li>
         {% endfor %}
     </ul>
-    
 
     <a href="{% url 'AddTodo' %}" class="btn btn-primary mt-3">➕ Přidat nový úkol</a>
     <a href="{% url 'home' %}" class="btn btn-link">🏠 Zpět na domů</a>
 
-        <script>
-            $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-
-        // Označit úkol jako dokončený
-        $(".mark-completed").click(function() {
-            var taskId = $(this).data('task-id');
-            $.post("{% url 'mark_completed_ajax' %}", { task_id: taskId }, function(response) {
-                if (response.status == "success") {
-                    $("#todo-" + taskId + " .badge").removeClass('bg-secondary').addClass('bg-success').text('Hotovo');
-                    $(this).attr("disabled", true); // Disable button
-                } else {
-                    console.log('Error:', response.message); // Debugging line
-                }
+    <script src="{% static 'js/darkmode.js' %}"></script> <!-- Odkaz na externí JavaScript soubor -->    
+    <script>
+        $(document).ready(function() {
+            $.ajaxSetup({
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
             });
-        });
 
-        // Smazat úkol
-        // Smazat úkol
-        $(document).on("click", ".delete-todo", function() {  // ✅ Oprava: Použití delegovaného event listeneru
-            var taskId = $(this).data('task-id');
-            var url = "{% url 'delete_todo_ajax' %}";  // ✅ Oprava: Uložení URL jako proměnné
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: { task_id: taskId },
-                success: function(response) {
-                    if (response.status === "success") {
-                        $("#todo-" + taskId).fadeOut(300, function() { $(this).remove(); });  // ✅ Oprava: Přidán fadeOut efekt
+            // Označit úkol jako dokončený
+            $(".mark-completed").click(function() {
+                var taskId = $(this).data('task-id');
+                var button = $(this);
+                $.post("{% url 'mark_completed_ajax' %}", { task_id: taskId }, function(response) {
+                    if (response.status == "success") {
+                        $("#todo-" + taskId + " .badge").removeClass('bg-secondary').addClass('bg-success').text('Hotovo');
+                        button.prop("disabled", true);
                     } else {
-                        console.log("Error:", response.message);
+                        console.log('Error:', response.message);
                     }
-                },
-                error: function(xhr) {
-                    console.log("Došlo k chybě:", xhr.responseText);
-                }
+                });
+            });
+
+            // Smazat úkol
+            $(document).on("click", ".delete-todo", function() {
+                var taskId = $(this).data('task-id');
+                $.ajax({
+                    url: "{% url 'delete_todo_ajax' %}",
+                    type: "POST",
+                    data: { task_id: taskId },
+                    success: function(response) {
+                        if (response.status === "success") {
+                            $("#todo-" + taskId).fadeOut(300, function() { $(this).remove(); });
+                        } else {
+                            console.log("Error:", response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log("Došlo k chybě:", xhr.responseText);
+                    }
+                });
             });
         });
-    });
-        </script>
+    </script>
 </body>
 </html>
