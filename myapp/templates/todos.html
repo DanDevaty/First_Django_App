@@ -28,70 +28,30 @@
                         {% if todo.deadline %}
                             (Deadline: {{ todo.deadline|date:"d.m.Y" }})
                         {% else %}
-                            (Žádný deadline)
+                            (No Deadline)
                         {% endif %}
                         {% if todo.man %}
-                            (Pověřený: {{ todo.man }})
+                            (Task owner: {{ todo.man }})
                         {% else %}
-                            (Pověřený: Všichni)
+                            (Task owner: Unknown)
                         {% endif %}
                     </small>
                 </div>
                 <span class="badge bg-{% if todo.completed %}success{% else %}secondary{% endif %}">
-                    {% if todo.completed %}Hotovo{% else %}Nedokončeno{% endif %}
+                    {% if todo.completed %}Completed{% else %}Incomplete{% endif %}
                 </span>
-                <button class="btn btn-success btn-sm mark-completed" data-task-id="{{ todo.id }}" {% if todo.completed %}disabled{% endif %}>✔️ Hotovo</button>
-                <button class="btn btn-danger btn-sm delete-todo" data-task-id="{{ todo.id }}">❌ Smazat</button>
+                <button class="btn btn-success btn-sm mark-completed" data-task-id="{{ todo.id }}" {% if todo.completed %}disabled{% endif %}>✔️ Finished </button>
+                <button class="btn btn-danger btn-sm delete-todo" data-task-id="{{ todo.id }}">❌ Delete </button>
             </li>
         {% empty %}
-            <li class="list-group-item">Žádné úkoly k zobrazení.</li>
+            <li class="list-group-item">No tasks to display.</li>
         {% endfor %}
     </ul>
 
-    <a href="{% url 'AddTodo' %}" class="btn btn-primary mt-3">➕ Přidat nový úkol</a>
-    <a href="{% url 'home' %}" class="btn btn-link">🏠 Zpět na domů</a>
+    <a href="{% url 'AddTodo' %}" class="btn btn-primary mt-3">➕ Add new task</a>
+    <a href="{% url 'home' %}" class="btn btn-link">🏠 Home </a>
 
     <script src="{% static 'js/darkmode.js' %}"></script> <!-- Odkaz na externí JavaScript soubor -->    
-    <script>
-        $(document).ready(function() {
-            $.ajaxSetup({
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-            });
-
-            // Označit úkol jako dokončený
-            $(".mark-completed").click(function() {
-                var taskId = $(this).data('task-id');
-                var button = $(this);
-                $.post("{% url 'mark_completed_ajax' %}", { task_id: taskId }, function(response) {
-                    if (response.status == "success") {
-                        $("#todo-" + taskId + " .badge").removeClass('bg-secondary').addClass('bg-success').text('Hotovo');
-                        button.prop("disabled", true);
-                    } else {
-                        console.log('Error:', response.message);
-                    }
-                });
-            });
-
-            // Smazat úkol
-            $(document).on("click", ".delete-todo", function() {
-                var taskId = $(this).data('task-id');
-                $.ajax({
-                    url: "{% url 'delete_todo_ajax' %}",
-                    type: "POST",
-                    data: { task_id: taskId },
-                    success: function(response) {
-                        if (response.status === "success") {
-                            $("#todo-" + taskId).fadeOut(300, function() { $(this).remove(); });
-                        } else {
-                            console.log("Error:", response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log("Došlo k chybě:", xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="{% static 'js/task_manager.js' %}"></script>
 </body>
 </html>
